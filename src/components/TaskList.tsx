@@ -20,12 +20,13 @@ function TaskList() {
   let [addTaskView, setAddTaskView] = useState(false);
   const dispatch = useAppDispatch();
   let [newTask, setNewTask] = useState("");
+  let [noOfPomodoros, setNoOfPomodoros] = useState(1);
   let tasks = useAppSelector((state: RootState) => state.pomodoro.tasks);
   function formatTask() {
     let tempNewTask: Task = {
       taskName: newTask,
       completedTime: "",
-      numberOfPomodoros: 1,
+      numberOfPomodoros: noOfPomodoros,
       isCompleted: false,
     };
     return tempNewTask;
@@ -72,12 +73,23 @@ function TaskList() {
           <div className="p-2 text-slate-400">Add Task</div>
           <input
             type="text"
-            className="rounded-md py-6 bg-slate-300 p-2 text-slate-800"
+            className="rounded-md py-2 bg-slate-300 p-2 text-slate-800"
             onChange={(event) => {
               setNewTask(event.target.value);
             }}
             value={newTask}
           />
+          <div className="flex justify-between py-2">
+            <div className="p-2 text-slate-400">Number Of Pomodoros</div>
+            <input
+              type="text"
+              className="rounded-md py-1 bg-slate-300 p-2 text-slate-800"
+              onChange={(event) => {
+                setNoOfPomodoros(event.target.value);
+              }}
+              value={noOfPomodoros}
+            />
+          </div>
           <div className="flex justify-end">
             <button
               className="w-1/4 mt-4 mx-2 rounded-lg bg-slate-500 p-2 px-8 text-slate-200"

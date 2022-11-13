@@ -8,9 +8,29 @@ import {
   updateTask,
 } from "../redux/slice/PomodoroSlice";
 import { useState } from "react";
+import Countdown, { zeroPad } from "react-countdown";
 
-function Timer() {
+function Timer(props) {
+  const calculateTimeLeft = () => {
+    let year = new Date().getFullYear();
+    let difference = +new Date(`10/01/${year}`) - +new Date();
+
+    let timeLeft = {};
+
+    if (difference > 0) {
+      timeLeft = {
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+        seconds: Math.floor((difference / 1000) % 60),
+      };
+    }
+
+    return timeLeft;
+  };
+
   let [selectedTime, setSelectedTime] = useState("");
+  let [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
   let currentTime = useSelector(
     (state: RootState) => state.pomodoro.settings.currentTime
   );
@@ -29,13 +49,28 @@ function Timer() {
   function updateTime(selectedTime: string) {
     setSelectedTime(selectedTime);
     if (selectedTime == "pomodoro") {
-      dispatch(setCurrentTime(pomodoroTime));
+      dispatch(setCurrentTime(pomodoroTime * 60 * 1000));
     } else if (selectedTime == "shortBreak") {
-      dispatch(setCurrentTime(shortBreakTime));
+      dispatch(setCurrentTime(shortBreakTime * 60 * 1000));
     } else {
-      dispatch(setCurrentTime(longBreakTime));
+      dispatch(setCurrentTime(longBreakTime * 60 * 1000));
     }
   }
+
+  let countdownApi;
+  function setRef(countdown) {
+    if (countdown) {
+      countdownApi = countdown.getApi();
+    }
+  }
+
+  const renderer = ({ minutes, seconds }) => {
+    return (
+      <span>
+        {zeroPad(minutes)}:{zeroPad(seconds)}
+      </span>
+    );
+  };
 
   return (
     <>
@@ -67,14 +102,25 @@ function Timer() {
           </div>
         </div>
         <div className="flex h-2/4 items-center justify-center text-9xl text-slate-600">
-          {currentTime}
+          <Countdown
+            date={Date.now() + currentTime}
+            ref={setRef}
+            renderer={renderer}
+            autoStart={false}
+          />
         </div>
         <div className="flex h-1/4 justify-center items-center py-8">
-          <button className="py-1 px-4 rounded-xl bg-slate-700 text-lg text-slate-400 font-extrabold hover:bg-slate-500 hover:text-slate-600">
+          <button
+            className="py-1 px-4 rounded-xl bg-slate-700 text-lg text-slate-400 font-extrabold hover:bg-slate-500 hover:text-slate-600"
+            onClick={() => countdownApi.start()}
+          >
             START
           </button>
         </div>
-        <div className="absolute bottom-2 right-2 transition hover:delay-200 hover:rotate-90">
+        <div
+          className="absolute bottom-2 right-2 transition hover:delay-200 hover:rotate-90"
+          onClick={() => props.view(true)}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
